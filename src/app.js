@@ -18,7 +18,7 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Fable API Running 🚀",
+    message: "Fable API Running",
   });
 });
 
