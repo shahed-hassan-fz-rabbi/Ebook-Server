@@ -20,5 +20,29 @@ router.get(
   UserController.getMe
 );
 
+router.get(
+  "/",
+  auth("admin"),
+  UserController.getAllUsers
+);
+
+router.patch(
+  "/:id/block",
+  auth("admin"),
+  UserController.blockUser
+);
+
+router.patch(
+  "/:id/unblock",
+  auth("admin"),
+  UserController.unblockUser
+);
+
+router.patch(
+  "/:id/role",
+  auth("admin"),
+  UserController.changeRole
+);
+
 export default router;
     

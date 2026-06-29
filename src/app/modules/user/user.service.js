@@ -57,12 +57,46 @@ const getMe = async (userId) => {
   return user;
 };
 
+const getAllUsers = async () => {
+  return await User.find().sort("-createdAt");
+};
+
+const blockUser = async (id) => {
+  return await User.findByIdAndUpdate(
+    id,
+    { isBlocked: true },
+    { new: true }
+  );
+};
+
+const unblockUser = async (id) => {
+  return await User.findByIdAndUpdate(
+    id,
+    { isBlocked: false },
+    { new: true }
+  );
+};
+
+const changeRole = async (id, role) => {
+  return await User.findByIdAndUpdate(
+    id,
+    { role },
+    { new: true }
+  );
+};
+
 
 
 export const UserService = {
   createUser,
   loginUser,
     getMe,
+    getAllUsers,
+
+
+blockUser,
+  unblockUser,
+  changeRole,
    
 //jwt
 

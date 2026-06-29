@@ -27,25 +27,38 @@ const getAllEbooks = async (query) => {
     filter.genre = query.genre;
   }
 
-  let sort = { createdAt: -1 };
 
-  switch (query.sort) {
-    case "rating":
-      sort = { averageRating: -1 };
-      break;
 
-    case "price_asc":
-      sort = { price: 1 };
-      break;
+ let sort = {};
 
-    case "price_desc":
-      sort = { price: -1 };
-      break;
+switch (query.sort) {
+  case "-createdAt":
+    sort = { createdAt: -1 };
+    break;
 
-    case "sales":
-      sort = { totalSales: -1 };
-      break;
-  }
+  case "createdAt":
+    sort = { createdAt: 1 };
+    break;
+
+  case "-price":
+    sort = { price: -1 };
+    break;
+
+  case "price":
+    sort = { price: 1 };
+    break;
+
+  case "-averageRating":
+    sort = { averageRating: -1 };
+    break;
+
+  case "-totalSales":
+    sort = { totalSales: -1 };
+    break;
+
+  default:
+    sort = { createdAt: -1 };
+}
 
   const result = await Ebook.find(filter)
     .populate("author", "name photo")

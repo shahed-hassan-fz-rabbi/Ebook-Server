@@ -1,5 +1,5 @@
 import express from "express";
-
+import adminRoutes from "../modules/admin/admin.route.js";
 import userRoutes from "../modules/user/user.route.js";
 import ebookRoutes from "../modules/ebook/ebook.route.js";
 import purchaseRoutes from "../modules/purchase/purchase.route.js";
@@ -11,7 +11,7 @@ router.use("/users", userRoutes);
 
 router.use("/ebooks", ebookRoutes);
 router.use("/purchases", purchaseRoutes);
-
+router.use("/admin", adminRoutes);
 router.use("/bookmarks", bookmarkRoutes);
 
 export default router;
