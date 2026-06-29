@@ -43,7 +43,8 @@ const getSingleEbook = catchAsync(async (req, res) => {
 const updateEbook = catchAsync(async (req, res) => {
   const result = await EbookService.updateEbook(
     req.params.id,
-    req.body
+    req.body,
+    req.user
   );
 
   sendResponse(res, {
@@ -56,7 +57,7 @@ const updateEbook = catchAsync(async (req, res) => {
 
 
 const deleteEbook = catchAsync(async (req, res) => {
-  await EbookService.deleteEbook(req.params.id);
+  await EbookService.deleteEbook(req.params.id, req.user);
 
   sendResponse(res, {
     statusCode: 200,

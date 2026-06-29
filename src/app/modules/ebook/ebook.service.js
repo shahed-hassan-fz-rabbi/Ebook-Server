@@ -84,30 +84,48 @@ const getSingleEbook = async (id) => {
   return ebook;
 };
 
-const updateEbook = async (id, payload) => {
-  const ebook = await Ebook.findByIdAndUpdate(id, payload, {
-    new: true,
-    runValidators: true,
-  }).populate("author", "name email");
+const updateEbook = async (id, payload, user) => {
+  const ebook = await Ebook.findById(id);
 
   if (!ebook) {
     throw new Error("Ebook not found");
   }
 
-  return ebook;
+  if (
+    user.role !== "admin" &&
+    ebook.author.toString() !== user._id.toString()
+  ) {
+    throw new Error("You are not authorized");
+  }
+
+  Object.assign(ebook, payload);
+
+  await ebook.save();
+
+  return ebook.populate("author", "name email");
 };
+
 
 //delete ebook
-
-const deleteEbook = async (id) => {
-  const ebook = await Ebook.findByIdAndDelete(id);
+const deleteEbook = async (id, user) => {
+  const ebook = await Ebook.findById(id);
 
   if (!ebook) {
     throw new Error("Ebook not found");
   }
 
-  return ebook;
+  if (
+    user.role !== "admin" &&
+    ebook.author.toString() !== user._id.toString()
+  ) {
+    throw new Error("You are not authorized");
+  }
+
+  await ebook.deleteOne();
+
+  return null;
 };
+
 
 
 export const EbookService = {

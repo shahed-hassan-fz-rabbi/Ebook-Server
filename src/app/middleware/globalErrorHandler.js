@@ -1,10 +1,11 @@
 const globalErrorHandler = (err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-
-  res.status(statusCode).json({
+  res.status(err.statusCode || 500).json({
     success: false,
-    statusCode,
     message: err.message || "Something went wrong",
+    stack:
+      process.env.NODE_ENV === "development"
+        ? err.stack
+        : undefined,
   });
 };
 
