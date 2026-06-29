@@ -1,4 +1,5 @@
 import User from "./user.model.js";
+import AppError from "../../utils/AppError.js";
 
 const createUser = async (payload) => {
   const existingUser = await User.findOne({
@@ -6,7 +7,10 @@ const createUser = async (payload) => {
   });
 
   if (existingUser) {
-    throw new Error("Email already exists");
+   throw new AppError(
+    409,
+    "Email already exists"
+);
   }
 
   const user = await User.create(payload);
@@ -14,6 +18,41 @@ const createUser = async (payload) => {
   return user;
 };
 
+const loginUser = async ({ email, password }) => {
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    throw new AppError(
+    404,
+    "User not found"
+);
+  }
+
+  if (user.isBlocked) {
+    throw new AppError(
+    403,
+    "Your account has been blocked"
+);
+  }
+
+  const isMatched = await user.comparePassword(password);
+
+  if (!isMatched) {
+    throw new AppError(
+    401,
+    "Invalid password"
+);
+  }
+
+  return user;
+};
+
 export const UserService = {
   createUser,
+  loginUser,
+
+//jwt
+
+
+
 };
