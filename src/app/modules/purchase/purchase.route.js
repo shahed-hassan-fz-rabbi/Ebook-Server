@@ -10,4 +10,14 @@ router.post(
   PurchaseController.createPurchase
 );
 
+router.post(
+
+   "/checkout",
+
+   auth("reader","writer","admin"),
+
+   PurchaseController.checkout
+
+);
+
 export default router;

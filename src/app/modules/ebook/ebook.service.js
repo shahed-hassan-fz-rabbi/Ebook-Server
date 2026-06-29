@@ -1,138 +1,131 @@
 import Ebook from "./ebook.model.js";
+import AppError from "../../utils/AppError.js";
 
-const createEbook = async (payload, userId) => {
-  const ebook = await Ebook.create({
-    ...payload,
-    author: userId,
-  });
+const createEbook = async (payload, authorId) => {
+  payload.author = authorId;
 
-  return ebook.populate("author", "name email");
+  const result = await Ebook.create(payload);
+
+  return result;
 };
+
 const getAllEbooks = async (query) => {
-  const {
-    search,
-    genre,
-    minPrice,
-    maxPrice,
-    sort = "-createdAt",
-    page = 1,
-    limit = 8,
-  } = query;
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 8;
+  const skip = (page - 1) * limit;
 
-  const filter = {
-    status: "published",
-  };
+  const filter = {};
 
-  if (search) {
-    filter.$or = [
-      {
-        title: {
-          $regex: search,
-          $options: "i",
-        },
-      },
-    ];
+  if (query.search) {
+    filter.title = {
+      $regex: query.search,
+      $options: "i",
+    };
   }
 
-  if (genre) {
-    filter.genre = genre;
+  if (query.genre && query.genre !== "All") {
+    filter.genre = query.genre;
   }
 
-  if (minPrice || maxPrice) {
-    filter.price = {};
+  let sort = { createdAt: -1 };
 
-    if (minPrice) {
-      filter.price.$gte = Number(minPrice);
-    }
+  switch (query.sort) {
+    case "rating":
+      sort = { averageRating: -1 };
+      break;
 
-    if (maxPrice) {
-      filter.price.$lte = Number(maxPrice);
-    }
+    case "price_asc":
+      sort = { price: 1 };
+      break;
+
+    case "price_desc":
+      sort = { price: -1 };
+      break;
+
+    case "sales":
+      sort = { totalSales: -1 };
+      break;
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
-
-  const ebooks = await Ebook.find(filter)
-    .populate("author", "name")
+  const result = await Ebook.find(filter)
+    .populate("author", "name photo")
     .sort(sort)
     .skip(skip)
-    .limit(Number(limit));
+    .limit(limit);
 
   const total = await Ebook.countDocuments(filter);
 
   return {
     meta: {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       total,
       totalPage: Math.ceil(total / limit),
     },
-    result: ebooks,
+    result,
   };
 };
 
 const getSingleEbook = async (id) => {
-  const ebook = await Ebook.findById(id).populate(
+  const result = await Ebook.findById(id).populate(
     "author",
-    "name email image"
+    "name photo email"
   );
 
-  if (!ebook) {
-    throw new Error("Ebook not found");
+  if (!result) {
+    throw new AppError(404, "Ebook not found");
   }
 
-  return ebook;
+  return result;
 };
 
 const updateEbook = async (id, payload, user) => {
   const ebook = await Ebook.findById(id);
 
   if (!ebook) {
-    throw new Error("Ebook not found");
+    throw new AppError(404, "Ebook not found");
   }
 
   if (
-    user.role !== "admin" &&
-    ebook.author.toString() !== user._id.toString()
+    ebook.author.toString() !== user._id.toString() &&
+    user.role !== "admin"
   ) {
-    throw new Error("You are not authorized");
+    throw new AppError(403, "Forbidden");
   }
 
-  Object.assign(ebook, payload);
+  const result = await Ebook.findByIdAndUpdate(
+    id,
+    payload,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
-  await ebook.save();
-
-  return ebook.populate("author", "name email");
+  return result;
 };
 
-
-//delete ebook
 const deleteEbook = async (id, user) => {
   const ebook = await Ebook.findById(id);
 
   if (!ebook) {
-    throw new Error("Ebook not found");
+    throw new AppError(404, "Ebook not found");
   }
 
   if (
-    user.role !== "admin" &&
-    ebook.author.toString() !== user._id.toString()
+    ebook.author.toString() !== user._id.toString() &&
+    user.role !== "admin"
   ) {
-    throw new Error("You are not authorized");
+    throw new AppError(403, "Forbidden");
   }
 
-  await ebook.deleteOne();
-
-  return null;
+  await Ebook.findByIdAndDelete(id);
 };
-
-
 
 export const EbookService = {
   createEbook,
-    getAllEbooks,
-    getSingleEbook,
-    updateEbook,
-    deleteEbook,
-
+  getAllEbooks,
+  getSingleEbook,
+  updateEbook,
+  deleteEbook,
 };

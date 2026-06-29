@@ -1,6 +1,8 @@
 import Purchase from "./purchase.model.js";
 import Ebook from "../ebook/ebook.model.js";
 import AppError from "../../utils/AppError.js";
+import stripe from "../../utils/stripe.js";
+
 
 const createPurchase = async (userId, ebookId) => {
   const ebook = await Ebook.findById(ebookId);
@@ -40,6 +42,71 @@ const createPurchase = async (userId, ebookId) => {
   return purchase;
 };
 
+
+const checkout = async (userId, ebookId) => {
+
+  const purchase = await createPurchase(
+    userId,
+    ebookId
+  );
+
+  const session = await createCheckoutSession(
+    purchase
+  );
+
+  purchase.transactionId = session.id;
+
+  await purchase.save();
+
+  return session.url;
+
+};
+
+
+const createCheckoutSession = async (purchase) => {
+
+  const session = await stripe.checkout.sessions.create({
+
+    payment_method_types: ["card"],
+
+    mode: "payment",
+
+    line_items: [
+
+      {
+
+        price_data: {
+
+          currency: "usd",
+
+          product_data: {
+
+            name: "Ebook Purchase",
+
+          },
+
+          unit_amount: purchase.price * 100,
+
+        },
+
+        quantity: 1,
+
+      },
+
+    ],
+
+    success_url: `${process.env.CLIENT_URL}/payment/success`,
+
+    cancel_url: `${process.env.CLIENT_URL}/payment/cancel`,
+
+  });
+
+  return session;
+
+};
+
 export const PurchaseService = {
   createPurchase,
+  createCheckoutSession,
+    checkout,
 };

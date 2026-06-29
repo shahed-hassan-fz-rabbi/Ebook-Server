@@ -15,7 +15,31 @@ const createPurchase = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const checkout = catchAsync(async (req,res)=>{
+
+   const result = await PurchaseService.checkout(
+
+        req.user._id,
+
+        req.body.ebook
+
+   );
+
+   sendResponse(res,{
+
+      statusCode:200,
+
+      success:true,
+
+      message:"Checkout Session Created",
+
+      data:result
+
+   });
+
+});
 
 export const PurchaseController = {
   createPurchase,
+    checkout,
 };
