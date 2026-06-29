@@ -47,10 +47,20 @@ const loginUser = async ({ email, password }) => {
   return user;
 };
 
+const getMe = async (userId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError(404, "User not found");
+  }
+
+  return user;
+};
+
 export const UserService = {
   createUser,
   loginUser,
-
+    getMe,
 //jwt
 
 
