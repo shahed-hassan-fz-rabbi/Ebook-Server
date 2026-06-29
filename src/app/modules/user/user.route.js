@@ -5,8 +5,14 @@ import auth from "../../middleware/auth.js";
 
 const router = express.Router();
 
+
+
 router.post("/register", UserController.createUser);
 router.post("/login", UserController.loginUser);
+
+
+
+
 
 router.get(
   "/me",
@@ -15,3 +21,4 @@ router.get(
 );
 
 export default router;
+    

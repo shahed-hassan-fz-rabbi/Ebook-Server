@@ -53,8 +53,10 @@ const getMe = catchAsync(async (req, res) => {
   });
 });
 
+
 export const UserController = {
   createUser,
   loginUser,
     getMe,
+    
 };
