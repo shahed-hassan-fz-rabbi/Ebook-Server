@@ -39,7 +39,23 @@ const checkout = catchAsync(async (req,res)=>{
 
 });
 
+const getAllPurchases = catchAsync(
+  async (req, res) => {
+
+    const result =
+      await PurchaseService.getAllPurchases();
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Purchases Retrieved",
+      data: result,
+    });
+  }
+);
+
 export const PurchaseController = {
   createPurchase,
     checkout,
+    getAllPurchases,
 };

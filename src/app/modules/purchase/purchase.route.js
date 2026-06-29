@@ -20,4 +20,10 @@ router.post(
 
 );
 
+router.get(
+  "/",
+  auth("admin"),
+  PurchaseController.getAllPurchases
+);
+
 export default router;

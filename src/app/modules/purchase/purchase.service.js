@@ -104,10 +104,13 @@ const createCheckoutSession = async (purchase) => {
   return session;
 
 };
+
+
 const getAllPurchases = async () => {
   return await Purchase.find()
-    .populate("user", "name")
+    .populate("buyer", "name email")
     .populate("ebook", "title")
+    .populate("writer", "name")
     .sort("-createdAt");
 };
 
@@ -117,4 +120,6 @@ export const PurchaseService = {
   createCheckoutSession,
     checkout,
     getAllPurchases,
+
+    
 };
