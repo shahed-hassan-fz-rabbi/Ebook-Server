@@ -1,15 +1,10 @@
 import express from "express";
 
-import auth from "../../middleware/auth.js";
-
-import { AdminController } from "./admin.controller.js";
-
 const router = express.Router();
 
-router.get(
-  "/analytics",
-  auth("admin"),
-  AdminController.getAnalytics
-);
+// Admin routes will be added here later (manage users, manage ebooks, transactions, analytics)
+router.get("/test", (req, res) => {
+  res.json({ success: true, message: "Admin route working" });
+});
 
 export default router;

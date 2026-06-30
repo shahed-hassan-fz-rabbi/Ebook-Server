@@ -1,72 +1,32 @@
 "use client";
 
-import {
-  Users,
-  BookOpen,
-  DollarSign,
-  ShoppingBag,
-} from "lucide-react";
+export const AdminService = {
+  getAdminStats: async (db) => {
+    try {
+      const usersCollection = db.collection("users");
+      const ebooksCollection = db.collection("ebooks");
+      const transactionsCollection = db.collection("transactions");
 
-const stats = [
-  {
-    title: "Users",
-    value: 125,
-    icon: Users,
-    color: "bg-blue-500",
-  },
-  {
-    title: "Books",
-    value: 54,
-    icon: BookOpen,
-    color: "bg-orange-500",
-  },
-  {
-    title: "Sales",
-    value: 320,
-    icon: ShoppingBag,
-    color: "bg-purple-500",
-  },
-  {
-    title: "Revenue",
-    value: "$2,450",
-    icon: DollarSign,
-    color: "bg-green-500",
-  },
-];
+      const totalUsers = await usersCollection.countDocuments();
+      
+      const totalWriters = await usersCollection.countDocuments({ role: "writer" });
 
-export default function AdminDashboard() {
-  return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">
-        Admin Dashboard
-      </h1>
+      const totalEbooksSold = await transactionsCollection.countDocuments({ type: "purchase" });
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((item) => {
-          const Icon = item.icon;
+      const revenueData = await transactionsCollection.aggregate([
+        { $group: { _id: null, total: { $sum: "$amount" } } }
+      ]).toArray();
+      
+      const totalRevenue = revenueData[0]?.total || 0;
 
-          return (
-            <div
-              key={item.title}
-              className="bg-white rounded-xl shadow p-6"
-            >
-              <div
-                className={`${item.color} w-12 h-12 rounded-lg flex items-center justify-center text-white`}
-              >
-                <Icon />
-              </div>
-
-              <h2 className="mt-5 text-gray-500">
-                {item.title}
-              </h2>
-
-              <h1 className="text-4xl font-bold mt-2">
-                {item.value}
-              </h1>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+      return {
+        totalUsers,
+        totalWriters,
+        totalEbooksSold,
+        totalRevenue
+      };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+};

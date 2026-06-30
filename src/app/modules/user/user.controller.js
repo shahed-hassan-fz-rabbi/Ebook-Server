@@ -3,6 +3,23 @@ import sendResponse from "../../utils/sendResponse.js";
 import { generateToken } from "../../utils/jwt.js";
 import { UserService } from "./user.service.js";
 
+
+
+const googleSync = catchAsync(async (req, res) => {
+  const result = await UserService.googleSync(req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Google login successful",
+    data: {
+      accessToken: result.token,
+      user: result.user,
+    },
+  });
+});
+
+
 const createUser = catchAsync(async (req, res) => {
   const result = await UserService.createUser(req.body);
 
@@ -107,6 +124,26 @@ const changeRole = catchAsync(async (req, res) => {
 });
 
 
+const getReaderDashboard = catchAsync(
+  async (req, res) => {
+    const result =
+      await UserService.getReaderDashboard(
+        req.user._id
+      );
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Reader Dashboard",
+      data: result,
+    });
+  }
+);
+
+
+
+
+
 export const UserController = {
   createUser,
   loginUser,
@@ -117,5 +154,10 @@ export const UserController = {
   blockUser,
   unblockUser,
   changeRole,
+
+  getReaderDashboard,
+
+  
+  googleSync,
     
 };
